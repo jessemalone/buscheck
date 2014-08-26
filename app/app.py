@@ -79,7 +79,7 @@ def get_upcoming_trips(stop_id):
     limit = 3 if request.args.get('limit') == None else request.args.get('limit')
     current_minute = datetime.now().minute
     current_hour = StopTime.to_system_hour(datetime.now().hour)
-    current_hour=24
+
     active_service_ids = [calendar.service_id for calendar in Calendar.get_active()]
 
     stop_times = StopTime.query.join(StopTime.trip).filter(StopTime.stop_id == stop_id)\
