@@ -1,0 +1,5 @@
+#!/usr/bin/python
+
+from lib import gtfs_realtime_pb2
+
+f = open(sys.argv[1],"rb")
