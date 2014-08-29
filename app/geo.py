@@ -1,4 +1,4 @@
-from math import cos, acos, radians
+from math import cos, acos, radians, degrees
 
 ## bounding_box on a sphere
 #  define a box with edges a given distance away from a point in meters
@@ -6,8 +6,8 @@ from math import cos, acos, radians
 # @param distance in meters for the box edges
 def bounding_box(point, distance):
 
-    r = point.radius 
-    d = distance
+    r = float(point.radius)
+    d = float(distance)
     # we'll denote latitude as phi and longitude as lambda
     
     # derived from the haversine formula we have
@@ -16,10 +16,13 @@ def bounding_box(point, distance):
     # phi2 = phi1 + d/r
 
     (lat1,long1) = (point.latitude,point.longitude)
-    (lambda1,phi1) = (radians(lat1),radians(lat2))
+    (phi1,lambda1) = (radians(lat1),radians(long1))
 
-    phi2 = acos(1 + (cos(d/r)-1)/cos(phi1)^2) + lambda1
-    lambda2 = lambda1 + d/r
+    lambda2 = acos(1 + (cos(d/r)-1)/cos(phi1)**2) + lambda1
+    phi2 = phi1 + d/r
+
+    print (phi1, lambda1)
+    print (phi2, lambda2)
 
     point2 = EarthCoord(degrees(phi2),degrees(lambda2))
 
@@ -27,7 +30,7 @@ def bounding_box(point, distance):
         point2.latitude,
         point.latitude - (point2.latitude - point.latitude),
         point2.longitude,
-        point2.longitude - (point2.longitude - point.longitude)
+        point.longitude - (point2.longitude - point.longitude))
 
 
 class BoundingBox:
@@ -57,7 +60,7 @@ class SphericalCoord:
 
 class EarthCoord(SphericalCoord):
     
-    radius = "todo: earh radius"
+    radius = 6371000
 
     def __init__(self,lat,long):
         self.latitude = lat

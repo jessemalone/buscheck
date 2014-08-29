@@ -5,6 +5,7 @@ from models import db, Route, Stop, StopTime, Trip, Calendar
 from sqlalchemy import and_, or_, orm
 from time import strftime
 from datetime import datetime
+from geo import EarthCoord, bounding_box, BoundingBox
 import json
 
 def jsonify(stuff):
@@ -99,8 +100,24 @@ def get_upcoming_trips(stop_id):
     return jsonify([stop_time.to_dict() for stop_time in stop_times])
 
 
-#@app.route('/stop/<stop_id>/next')
-#def get_predictions(stop_id)
+@app.route('/stops/nearby', methods=['POST'])
+def find_stops():
+    request_json = request.get_json(force=True)
+
+    latitude = request_json['latitude']
+    longitude = request_json['longitude']
+    distance = request_json['distance']
+
+    coords = EarthCoord(latitude,longitude)
+    boundary = bounding_box(coords, distance)
+
+    stops = Stop.query\
+        .filter(Stop.stop_lat <= boundary.edge_north)\
+        .filter(Stop.stop_lat >= boundary.edge_south)\
+        .filter(Stop.stop_lon <= boundary.edge_east)\
+        .filter(Stop.stop_lon >= boundary.edge_west)
+
+    return jsonify([stop.to_dict() for stop in stops.all()])
 
 if __name__ == '__main__':
     manager.run()
