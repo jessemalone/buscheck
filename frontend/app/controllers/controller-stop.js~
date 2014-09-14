@@ -1,0 +1,7 @@
+import Ember form 'ember';
+
+export default Ember.Controller.extend({
+    setupController: function(controller, stops) {
+	
+    }
+});

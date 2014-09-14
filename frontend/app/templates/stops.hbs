@@ -1,0 +1,12 @@
+HELLO
+<div id="stops" class="container-fluid horizontal">
+     <div class="row">
+     	  {{#each model}}
+     	  <div class="col-xs-6">{{stop_name}}<br />[Stop {{stop_code}}]</div>
+     	  {{/each}}	  
+	  </div>
+</div>
+
+<div id="vehicles" class="container-fluid">
+{{outlet}}
+</div >

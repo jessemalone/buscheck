@@ -27,18 +27,30 @@ migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
-@app.route('/stops')
+@app.route('/stops/<stop_id>')
+def get_stop(stop_id):
+    stop = Stop.query.filter_by(stop_id=stop_id).one()
+    return jsonify({"stop":dict(stop.to_dict().items() + {'links':{"stopTimes":'/stops/'+str(stop.stop_id)+'/trips'}}.items())})
+
+@app.route('/stops/')
 def get_stops():
-    stops = Stop.query.all()
+    if (request.args.get('longitude') != None and \
+             request.args.get('latitude') != None and \
+             request.args.get('distance') != None):
+         stops = find_nearby_stops(float(request.args.get('latitude')),\
+                                       float(request.args.get('longitude')),\
+                                       request.args.get('distance'))
+    else:
+        stops = Stop.query.all()
     #print ([stop.to_dict() for stop in stops])
-    return jsonify([stop.to_dict() for stop in stops])
+    return jsonify({'stops':[dict(stop.to_dict().items() + { 'links':{'stopTimes':'/stops/'+str(stop.stop_id)+'/trips'} }.items()) for stop in stops]})
 
 @app.route('/routes')
 def get_routes():
     routes = Route.query.all()
     return jsonify([route.to_dict() for route in routes])
 
-@app.route('/stop/<stop_id>/trips/within_minutes/<minutes>')
+@app.route('/stops/<stop_id>/arrivals/within_minutes/<minutes>')
 def get_stop_trips(stop_id,minutes):
     minutes = int(minutes)
     hour = datetime.now().hour
@@ -75,7 +87,7 @@ def get_stop_trips(stop_id,minutes):
     
     return jsonify([stop_time.to_dict() for stop_time in stop_times])
 
-@app.route('/stop/<stop_id>/trips', methods = ['GET'])
+@app.route('/stops/<stop_id>/trips', methods = ['GET'])
 def get_upcoming_trips(stop_id):
     limit = 3 if request.args.get('limit') == None else request.args.get('limit')
     current_minute = datetime.now().minute
@@ -97,16 +109,10 @@ def get_upcoming_trips(stop_id):
          ).order_by(StopTime.arrival_time.asc()).limit(limit)\
          .options(orm.contains_eager(StopTime.trip,Trip.stop_times)).all()
 
-    return jsonify([stop_time.to_dict() for stop_time in stop_times])
+    return jsonify({"stopTimes": [stop_time.to_dict() for stop_time in stop_times]})
 
 
-@app.route('/stops/nearby', methods=['POST'])
-def find_stops():
-    request_json = request.get_json(force=True)
-
-    latitude = request_json['latitude']
-    longitude = request_json['longitude']
-    distance = request_json['distance']
+def find_nearby_stops(latitude, longitude, distance):
 
     coords = EarthCoord(latitude,longitude)
     boundary = bounding_box(coords, distance)
@@ -116,8 +122,8 @@ def find_stops():
         .filter(Stop.stop_lat >= boundary.edge_south)\
         .filter(Stop.stop_lon <= boundary.edge_east)\
         .filter(Stop.stop_lon >= boundary.edge_west)
-
-    return jsonify([stop.to_dict() for stop in stops.all()])
+    return stops
+    #return jsonify({'stops': [stop.to_dict() for stop in stops.all()]})
 
 if __name__ == '__main__':
     manager.run()

@@ -1,0 +1,16 @@
+ihtml, body {
+  margin: 20px;
+}
+
+.horizontal  .row {
+ overflow-x:scroll;
+     overflow-y:hidden;
+    white-space:nowrap;
+}  
+
+.horizontal .row [class*="col-lg"], .horizontal .row [class*="col-md"], .horizontal  .row [class*="col-sm"], .horizontal  .row [class*="col-xs"]  {
+    float:none;
+    display:inline-block;
+    white-space:normal;
+    vertical-align:top;
+}

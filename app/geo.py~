@@ -1,0 +1,64 @@
+from math import cos, acos, radians
+## bounding_box
+#  define a box with edges a given distance away from a point in meters
+# @param SphericalCoord point - spherical coordinates to a point
+# @param distance in meters for the box edges
+def bounding_box(point, distance):
+
+    r = point.radius 
+    d = distance
+    # we'll denote latitude as phi and longitude as lambda
+    
+    # derived from the haversine formula we have
+    #
+    # lambda2 = arccos(1 + (cos(d/r)-1/cos^2(phi1)) + lambda1
+    # phi2 = phi1 + d/r
+
+    (lat1,long1) = (point.latitude,point.longitude)
+    (lambda1,phi1) = (radians(lat1),radians(lat2))
+
+    phi2 = acos(1 + (cos(d/r)-1)/cos(phi1)^2) + lambda1
+    lambda2 = lambda1 + d/r
+
+    point2 = EarthCoord(degrees(phi2),degrees(lambda2))
+
+    return BoundingBox(\
+        point2.latitude,
+        point.latitude - (point2.latitude - point.latitude),
+        point2.longitude,
+        point2.longitude - (point2.longitude - point.longitude)
+
+
+class BoundingBox:
+    
+    edge_north = 0.0
+    edge_south = 0.0
+    edge_east = 0.0
+    edge_west = 0.0
+
+    def __init__(self,n,s,e,w):
+        self.edge_north = n
+        self.edge_south = s
+        self.edge_east = e
+        self.edge_west = w
+
+class SphericalCoord:
+
+    latitude = 0.0
+    longitude = 0.0
+    radius = 0
+
+    def __init__(self,lat,long,r):
+        self.latitude = lat
+        self.longitude = long
+        self.radius = r
+        return self
+
+class EarthCoord(SphericalCoord):
+    
+    radius = "todo: earh radius"
+
+    def __init__(self,lat,long):
+        self.latitude = lat
+        self.longitude = long
+    
